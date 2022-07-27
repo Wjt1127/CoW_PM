@@ -1,3 +1,9 @@
+/*
+ * Todo 7-27:
+ * 先跳过PM的分配问题，在用户态建立一个文件来记录POT(persisten-obj-table)。
+ */
+
+
 #define pr_fmt(fmt) KBUILD_MODNAME ": " fmt
 
 #include <linux/kernel.h>
@@ -300,3 +306,6 @@ out_fput:
 		fput(file);
 	return retval;
 }
+
+
+
