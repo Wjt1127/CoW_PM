@@ -9,8 +9,8 @@
  * Object handle
  */
 typedef struct pmemoid {
-	uint64_t pool_uuid_lo;
-	uint64_t off;
+	uint64_t objid;  //obj-id
+	uint64_t off;   //offset
 } PMEMoid;
 
 
