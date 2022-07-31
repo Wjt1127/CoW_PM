@@ -17,10 +17,10 @@ typedef struct pmemoid {
  * OTE:Object Table entry 
  * 记录obj到pm的映射
  */
-typedef struct OTE
+typedef struct __OTE
 {    
      //使用 ino + offset
      PMEMoid obj; //其中包含了offset
      unsigned long i_ino;  //inode number
-};
+}OTE;
 

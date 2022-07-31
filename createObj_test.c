@@ -4,12 +4,17 @@
  * 并测试、了解使用 ino + offset 打开文件的流程
  */
 
-#include <stddef.h>
-#include <stdint.h>
-//#include <obj.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
 #include <uuid/uuid.h>
+#include <linux/sched.h>
+#include <obj.h>
+
+#include <asm/current.h>
+
 #define ID_BYTES 8 //如果需要修改oid为128位，则改为16
 
 /* 通过以下函数获得uuid,并以此标识obj */
@@ -45,6 +50,37 @@ unsigned long Oid_generate()
           }
      }
 }
+
+
+
+/*
+ * 根据输入的 fd和 offset返回对应的对象句柄
+ * 并在POT中建立 该对象到 offset的映射条目
+ */
+PMEMoid CreateObj(int fd,off_t offset)
+{
+     int fd;
+     struct file *file;
+     PMEMoid obj;
+     OTE add_ote;
+
+     if((fd=open("POT",O_RDWR)) < 0){  /* POT是 Persistent Object Table
+               为了简化前期的工作 使用POT文件来记录object 到 offset的映射*/
+          perror("open");
+		exit(1);
+     }
+
+     struct files_struct *files = current->files;  //获取本进程的files结构体
+     file = fcheck_files(files, fd); //根据files_struct结构获取file结构体
+
+     struct inode *finode = file->f_inode;
+     unsigned long ino = finode->i_ino;  //获得 inode number
+     
+     obj.objid = Oid_generate()
+
+}
+
+
 
 int main()
 {
