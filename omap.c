@@ -6,11 +6,73 @@
 
 #include <obj.h>
 
+
+
+/*
+ * 原本是使用file对应的get_unmapped_area的 ：
+ *         get_area = file->f_op->get_unmapped_area;
+ * 这里应该要改成obj的 应该在obj的结构体中加一个类似file的方法就行
+ */
+unsigned long
+get_unmapped_area(struct file *file, unsigned long addr, unsigned long len,
+		unsigned long pgoff, unsigned long flags)
+{
+	unsigned long (*get_area)(struct file *, unsigned long,
+				  unsigned long, unsigned long, unsigned long);
+	/* 针对特定平台的检查，目前arm64中arch_mmap_check 是一个空函数 */
+	unsigned long error = arch_mmap_check(addr, len, flags);
+	if (error)
+		return error;
+
+	/* 申请虚拟空间的地址不能超过最大值。这里可以知道虚拟空间size 的最大值就是TASK_SIZE */
+	/* Careful about overflows.. */
+	if (len > TASK_SIZE)
+		return -ENOMEM;
+	//指向当前进程的unmap空间分配函数
+	get_area = current->mm->get_unmapped_area;
+	/* file 不为空的话，则 unmap空间分配函数 执行file中指定的函数 */
+	if (file) {
+		if (file->f_op->get_unmapped_area)
+			get_area = file->f_op->get_unmapped_area;
+	} else if (flags & MAP_SHARED) {
+		/* 如果file为空，说明可能申请的是匿名空间，这里检查
+		   如果是共享内存的话，则分配函数执行共享内存的分配函数 */
+		/*
+		 * mmap_region() will call shmem_zero_setup() to create a file,
+		 * so use shmem's get_unmapped_area in case it can be huge.
+		 * do_mmap_pgoff() will clear pgoff, so match alignment.
+		 */
+		pgoff = 0;
+		 //如果是共享内存的话 选择使用share_memory的 unmap空间分配函数
+		get_area = shmem_get_unmapped_area;
+	}
+
+	/* 前面都是根据参数或一些判断 来选择使用哪种get_area函数
+	   (进程地址空间中没有被分配的空间) */
+	addr = get_area(file, addr, len, pgoff, flags);
+	if (IS_ERR_VALUE(addr))
+		return addr;
+
+	/* addr +len 不能大于TASK_SIZE */
+	if (addr > TASK_SIZE - len)
+		return -ENOMEM;
+
+	/* 检查分配到的地址是否已经被映射，
+	   如果已经被映射则返回error，毕竟这里要分配的是进程未映射的空间。*/
+	if (offset_in_page(addr))
+		return -EINVAL;
+
+	/* secure检查 */
+	error = security_mmap_addr(addr);
+	return error ? error : addr;
+}
+
+
 /*
  * vma->vm_file = get_file(file)建立文件与vma的映射, 
  * 在其中调用 mmap_region() 创建虚拟内存区域
  */
-unsigned long do_mmap(struct file *file, unsigned long addr,
+unsigned long do_omap(struct file *file, unsigned long addr,
 			unsigned long len, unsigned long prot,
 			unsigned long flags, vm_flags_t vm_flags,
 			unsigned long pgoff, unsigned long *populate,
@@ -26,17 +88,6 @@ unsigned long do_mmap(struct file *file, unsigned long addr,
 	if (!len)
 		return -EINVAL;
 
-	/*
-	 * Does the application expect PROT_READ to imply PROT_EXEC?
-	 *
-	 * (the exception is when the underlying filesystem is noexec
-	 *  mounted, in which case we dont add PROT_EXEC.)
-	 */
-	if ((prot & PROT_READ) && (current->personality & READ_IMPLIES_EXEC))
-		if (!(file && path_noexec(&file->f_path)))
-			prot |= PROT_EXEC;
-	/* 假如没有设置MAP_FIXED标志，且addr小于mmap_min_addr, 因为可以修改addr, 
-	   所以就需要将addr设为mmap_min_addr的页对齐后的地址 */
 	if (!(flags & MAP_FIXED))
 		addr = round_hint_to_min(addr);
 
