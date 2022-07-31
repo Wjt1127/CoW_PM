@@ -69,7 +69,7 @@ PMEMoid CreateObj(int fd,off_t offset)
      /* 在POT中添加这条映射 */
      add_ote.obj = obj;
      add_ote.i_ino = ino;
-     fwrite(add_ote,sizeof(add_ote),1,fd_pot);  //后续需修改
+     fwrite(add_ote,sizeof(add_ote),1,fd_pot);  //没有配好qemu 后续再修改
 
      return obj;
 }
