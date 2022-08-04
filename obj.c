@@ -66,6 +66,11 @@ PMEMoid CreateObj(int fd,off_t offset)
      obj.objid = Oid_generate();
      obj.off = offset;
 
+     /* 测试输出 */
+     printf("id of the obj:%lX\n",obj.objid);
+     printf("ino of the obj:%ld\n",ino);
+     printf("offset of the obj:%ld\n",obj.off);
+
      /* 在POT中添加这条映射 */
      add_ote.obj = obj;
      add_ote.i_ino = ino;
