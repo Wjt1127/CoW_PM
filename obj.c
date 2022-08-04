@@ -50,7 +50,7 @@ PMEMoid CreateObj(int fd,off_t offset)
 
      /* 后期需要去除打开pot文件这段 实现一个函数获得POT的基址 */
      FILE* fd_pot;
-     if((fd_pot=fopen("POT","a+")) == NULL){  /* POT是 Persistent Object Table
+     if((fd_pot=fopen("POT","ab+")) == NULL){  /* POT是 Persistent Object Table
                为了简化前期的工作 使用POT文件来记录object 到 offset的映射*/
           perror("fopen");
 		exit(1);
@@ -69,7 +69,7 @@ PMEMoid CreateObj(int fd,off_t offset)
      /* 在POT中添加这条映射 */
      add_ote.obj = obj;
      add_ote.i_ino = ino;
-     fwrite(add_ote,sizeof(add_ote),1,fd_pot);  //没有配好qemu 后续再修改
+     fwrite(&add_ote,sizeof(add_ote),1,fd_pot);  //没有配好qemu 后续再修改
 
      return obj;
 }
