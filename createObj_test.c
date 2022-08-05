@@ -11,9 +11,26 @@
 #include <sys/time.h>
 #include <uuid/uuid.h>
 #include <linux/sched.h>
-#include <obj.h>
-
 #include <asm/current.h>
+
+/*
+ * Object handle
+ */
+typedef struct pmemoid {
+	uint64_t objid;  //obj-id
+	uint64_t off;   //offset
+} PMEMoid;
+
+/*
+ * OTE:Object Table entry 
+ * 记录obj到pm的映射
+ */
+typedef struct __OTE
+{    
+     //使用 ino + offset
+     PMEMoid obj; //其中包含了offset
+     unsigned long i_ino;  //inode number
+} OTE;
 
 #define ID_BYTES 8 //如果需要修改oid为128位，则改为16
 
@@ -81,6 +98,11 @@ PMEMoid CreateObj(int fd,off_t offset)
      obj.objid = Oid_generate();
      obj.off = offset;
 
+     /* 测试输出 */
+     printf("id of the obj:%lX\n",obj.objid);
+     printf("ino of the obj:%ld\n",ino);
+     printf("offset of the obj:%ld\n",obj.off);
+
      /* 在POT中添加这条映射 */
      add_ote.obj = obj;
      add_ote.i_ino = ino;
@@ -88,8 +110,6 @@ PMEMoid CreateObj(int fd,off_t offset)
 
      return obj;
 }
-
-
 
 
 int main()

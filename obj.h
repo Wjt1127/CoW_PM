@@ -10,7 +10,6 @@
 #include <sys/time.h>
 #include <uuid/uuid.h>
 #include <linux/sched.h>
-
 #include <asm/current.h>
 
 /*
