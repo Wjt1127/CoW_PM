@@ -1,5 +1,4 @@
 /*
- * 
  * 实现在PM中记录 obj -> offset 的映射，我们需要在PM的固定地址处分配一个空间
  * 为了前期的简化操作，创建一个文件来代替PM的固定地址空间
  * 并测试、了解使用 ino + offset 打开文件的流程
@@ -75,7 +74,7 @@ uint64_t Oid_generate()
  * 根据输入的 fd和 offset返回对应的对象句柄
  * 并在POT中建立 该对象到 offset的映射条目
  */
-PMEMoid CreateObj(int fd,off_t offset)
+PMEMoid CreateObj(int fd,uint64_t offset)
 {
      struct file *file;
      PMEMoid obj;
