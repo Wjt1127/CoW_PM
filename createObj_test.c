@@ -1,4 +1,5 @@
 /*
+ * 
  * 实现在PM中记录 obj -> offset 的映射，我们需要在PM的固定地址处分配一个空间
  * 为了前期的简化操作，创建一个文件来代替PM的固定地址空间
  * 并测试、了解使用 ino + offset 打开文件的流程
@@ -6,12 +7,20 @@
 
 #include <fcntl.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <string.h>
 #include <sys/time.h>
 #include <uuid/uuid.h>
 #include <linux/sched.h>
 #include <asm/current.h>
+
+/* 
+ * 在内核中添加模块进行测试
+ */
+#include <linux/init.h>
+#include <linux/module.h>
+#include <linux/kernel.h>
 
 /*
  * Object handle
@@ -75,14 +84,13 @@ uint64_t Oid_generate()
  */
 PMEMoid CreateObj(int fd,off_t offset)
 {
-     int fd;
      struct file *file;
      PMEMoid obj;
      OTE add_ote;
 
      /* 后期需要去除打开pot文件这段 实现一个函数获得POT的基址 */
      FILE* fd_pot;
-     if((fd_pot=fopen("POT","ab+")) == NULL){  /* POT是 Persistent Object Table
+     if((fd_pot = fopen("POT","ab+")) == NULL){  /* POT是 Persistent Object Table
                为了简化前期的工作 使用POT文件来记录object 到 offset的映射*/
           perror("fopen");
 		exit(1);
@@ -93,7 +101,7 @@ PMEMoid CreateObj(int fd,off_t offset)
      file = fcheck_files(files, fd); //根据files_struct结构获取file结构体
      struct inode *finode = file->f_inode;
      unsigned long ino = finode->i_ino;  //获得 inode number
-     
+
      /* 初始化对象句柄 */
      obj.objid = Oid_generate();
      obj.off = offset;
@@ -111,9 +119,4 @@ PMEMoid CreateObj(int fd,off_t offset)
      return obj;
 }
 
-
-int main()
-{
-     printf("%lX\n", Oid_generate());
-     return 0;
-}
+static 

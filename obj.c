@@ -37,20 +37,20 @@ uint64_t Oid_generate()
      }
 }
 
+
 /*
  * 根据输入的 fd和 offset返回对应的对象句柄
  * 并在POT中建立 该对象到 offset的映射条目
  */
 PMEMoid CreateObj(int fd,off_t offset)
 {
-     int fd;
      struct file *file;
      PMEMoid obj;
      OTE add_ote;
 
      /* 后期需要去除打开pot文件这段 实现一个函数获得POT的基址 */
      FILE* fd_pot;
-     if((fd_pot=fopen("POT","ab+")) == NULL){  /* POT是 Persistent Object Table
+     if((fd_pot = fopen("POT","ab+")) == NULL){  /* POT是 Persistent Object Table
                为了简化前期的工作 使用POT文件来记录object 到 offset的映射*/
           perror("fopen");
 		exit(1);
