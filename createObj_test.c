@@ -15,13 +15,6 @@
 #include <linux/sched.h>
 #include <asm/current.h>
 
-/* 
- * 在内核中添加模块进行测试
- */
-#include <linux/init.h>
-#include <linux/module.h>
-#include <linux/kernel.h>
-
 /*
  * Object handle
  */
@@ -118,5 +111,3 @@ PMEMoid CreateObj(int fd,off_t offset)
 
      return obj;
 }
-
-static 
