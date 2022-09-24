@@ -7,6 +7,7 @@
 #include <sys/types.h>
 #include <string.h>
 #include <dirent.h>
+#include <fcntl.h>
 
 #include "pmem_buddy.h"
 #include "buddy_alloc.h"
@@ -14,63 +15,46 @@
 /**
  * @brief Initialize pmem allocator.
  *
- * @param[in] dir
+ * @param[in] file_fullpath
  * @param base_ptr Base address of the allocator. If NULL, it will be allocated.
  * @param max_size Size of the pool.
  * @param size
  * @return pbuddy_alloc_t* Pointer to the allocator.
  */
-pbuddy_alloc_t *pbuddy_alloc_init(const char *dir, void *base_ptr, size_t max_size, size_t size)
+pbuddy_alloc_t *pbuddy_alloc_init(char *file_fullpath, void *base_ptr, size_t max_size, size_t size)
 {
     pbuddy_alloc_t *allocator;
     int fd;
     void *addr;
-    static char template[] = "/pmem.XXXXXX";
-    int dir_len;
-    char *file_fullpath;
+    int file_fullpath_len;
 
-    dir_len = strlen(dir);
+    file_fullpath_len = strlen(file_fullpath);
 
-    // 디렉토리가 존재하는지 체크
-    if (access(dir, F_OK))
-        return NULL;
-
-    if (dir_len > PATH_MAX)
+    if (file_fullpath_len > PATH_MAX)
     {
-        printf("Could not create temporary file: too long path.");
+        printf("Could not create file: too long path.");
         return NULL;
     }
 
-    file_fullpath = (char *)mmap(NULL, dir_len + sizeof(template), PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_SHARED, -1, 0);
+    fd = open(file_fullpath, O_RDWR | O_APPEND | O_CREAT, S_IRUSR | S_IWUSR);
 
-    if (file_fullpath == NULL)
-    {
-        printf("mmap failed\n");
-        return NULL;
-    }
-    strcpy(file_fullpath, dir);
-    strcat(file_fullpath, template);
-
-    if ((fd = mkstemp(file_fullpath)) < 0) // 임시 파일 생성
-    {
-        printf("Could not create temporary file");
-        goto exit;
-    }
-
-    if (ftruncate(fd, max_size)) // 파일의 크기 설정
+    if (ftruncate(fd, max_size)) // 设置文件大小
     {
         printf("ftruncate failed\n");
         goto exit;
     }
 
-    // 파일을 메모리에 매핑한다.
-    addr = mmap(base_ptr, max_size, PROT_READ | PROT_WRITE, MAP_SHARED_VALIDATE | MAP_SYNC, fd, 0);
+    // 将文件映射到内存。
+    addr = mmap(base_ptr, max_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    
     if (addr == MAP_FAILED)
     {
         printf("mmap failed\n");
         goto exit;
     }
     close(fd);
+
+    //初始化分配器
     allocator = buddy_allocator_new(addr, max_size, size, file_fullpath);
     if (allocator == NULL)
     {
@@ -84,15 +68,15 @@ exit:
     if (fd != -1)
         (void)close(fd);
     if (file_fullpath != NULL)
-        (void)munmap(file_fullpath, dir_len + sizeof(template));
+        (void)munmap(file_fullpath, file_fullpath_len);
     return NULL;
 }
 
 /**
- * @brief 메모리를 unmap하고 파일을 삭제한다.
+ * @brief 进行内存unmap 并删除文件。
  *
- * @param alloc_ptr pmem_alloc 구조체의 주소.
- * @return int 성공시 0, 실패시 -1.
+ * @param alloc_ptr pmem_alloc结构的地址。
+ * @return int 成功 0, 失败 -1.
  */
 int pbuddy_alloc_destroy(pbuddy_alloc_t **alloc_ptr)
 {

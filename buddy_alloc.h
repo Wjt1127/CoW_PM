@@ -18,7 +18,7 @@
 #define BUDDY_PAGESIZE ((uint64_t)(1U << BUDDY_PAGE_SHIFT))     /* 4096 */
 #define BUDDY_MAX_CHUNKSIZE ((uint64_t)(1U << BUDDY_MAX_SHIFT)) /* 1G */
 
-#define BUDDY_BINS_CNT (BUDDY_MAX_SHIFT - BUDDY_PAGE_SHIFT + 1)
+#define BUDDY_BINS_CNT (BUDDY_MAX_SHIFT - BUDDY_PAGE_SHIFT + 1) /* buddy allocator的层数 */
 
 #define MAX(a, b) (((a) >= (b)) ? (a) : (b))
 #define MIN(a, b) (((a) <= (b)) ? (a) : (b))
@@ -52,12 +52,12 @@ typedef struct pbuddy_alloc_s
 {
     pthread_mutex_t mutex;
 
-    char *file_fullpath;         // 파일의 전체 경로
-    char *page_start;            // 실제 buddy chunk가 시작되는 주소
-    uint64_t reserved;           // 메타데이터 공간의 크기
+    char *file_fullpath;         // 文件的完整路径
+    char *page_start;            // buddy chunk的起始地址
+    uint64_t reserved;           // 元数据空间的大小
     uint64_t alloc_size;         
-    uint64_t max_available_size; // 추후 expand 고려해서 쓸 수 있는 전체 공간의 크기
-    uint64_t available_size;     // 현재 buddy_malloc으로 쓸 수 있는 공간의 크기
+    uint64_t max_available_size; // 考虑到未来扩展可使用的总空间大小
+    uint64_t available_size;     // buddy_malloc 当前可用的空间量
     uint64_t total_used;
     uint64_t periodic_total_used_max;
 
