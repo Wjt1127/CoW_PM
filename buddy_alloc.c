@@ -3,10 +3,12 @@
  * @brief   Buddy allocator
  *
  *
- * buddy 방식이기 때문에, 2^n 크기로만 메모리를 할당할 수 있고, 할당할 수 있는
- * 최소값은 BUDDY_PAGESIZE로 4096 (4kb) 이다.
- * buddy 방식은 간단하고, 효율도 좋고, external fragmentation이 없다는 장점이
- * 있으나, 할당하는 양이 2^n 이라 internal fragmentation이 늘어나게 될 수 있다.
+ * Because it is a buddy allocator, memory can be allocated only with a size 
+ * of 2^n, and the minimum value that can be allocated is 4096 (4kb) as 
+ * BUDDY_PAGESIZE.
+ * The buddy allocator has advantages of simplicity, good efficiency, and 
+ * no external fragmentation.However, since the amount allocated is 2^n, 
+ * internal fragmentation may increase.
  *
  */
 
@@ -91,6 +93,7 @@ buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *fi
     }
 
     alloc->page_start = (char *)page_start;
+    alloc->pot_start = NULL;     // 初始化为NULL，当为POT分配时，记录它的地址
     alloc->reserved = reserved;  //allocator结构体和bitmap的字节大小
 
     /* 考虑到未来扩展可使用的 buddy page  */
