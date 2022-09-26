@@ -34,11 +34,11 @@ struct buddy_chunk_s
  * ...
  * bin #(max): 1G-size chunk (BUDDY_MAX_CHUNKSIZE)
  *
- * bitmap: 0이면 free, 1이면 allocated를 나타낸다. 어떤 chunk가 free이면,
- * 그 chunk를 자른 subchunk에 해당하는 bit는 모두 1이 된다.
+ * bitmap: 0 indicates free, 1 indicates allocated. If any chunk is free,
+ * the bits corresponding to the subchunk that cut the chunk are all 1.
  *
- * 예를 들면, 총 10개의 page가 존재하고, free chunk가 다음과 같이 두 개 있을
- * 경우,
+ * For example, if there are a total of 10 pages and there are two free 
+ * chunks as follows:
  *
  *            AAFF AAAF AA  (A: allocated, F: free)
  *
@@ -54,8 +54,9 @@ typedef struct pbuddy_alloc_s
 
     char *file_fullpath;         // 文件的完整路径
     char *page_start;            // buddy chunk的起始地址
+    void *pot_start;             // POT的起始地址
     uint64_t reserved;           // 元数据空间的大小
-    uint64_t alloc_size;         
+    uint64_t alloc_size;         // 
     uint64_t max_available_size; // 考虑到未来扩展可使用的总空间大小
     uint64_t available_size;     // buddy_malloc 当前可用的空间量
     uint64_t total_used;

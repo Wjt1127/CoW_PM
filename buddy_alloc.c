@@ -41,8 +41,8 @@ static void buddy_free_internal(pbuddy_alloc_t *alloc, void *page, uint64_t size
 
 /**
  * @brief         buddy_allocator 分配
- *
- * @param[in]   size     : allocator分配器分配的内存总量
+ * @param[in]   size     : PM pool的最大大小
+ * @param[in]   size     : allocator分配器可用于分配的内存总量
  */
 pbuddy_alloc_t *
 buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *file_fullpath)
