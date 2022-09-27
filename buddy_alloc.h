@@ -42,7 +42,7 @@ struct buddy_chunk_s
  *
  *            AAFF AAAF AA  (A: allocated, F: free)
  *
- * bitmap #0: 1111 1110 111 (last bit: sentinel)
+ * bitmap #0: 1100 1110 111 (last bit: sentinel)
  * bitmap #1: 1 0  1 1  1 1
  * bitmap #2: 1    1    1
  * bitmap #3: 1         1

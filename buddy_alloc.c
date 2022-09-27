@@ -55,7 +55,18 @@ buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *fi
     int bytes, bits;
     int available_bits;
     char *page;
-
+/*
+ * For example, if there are a total of 10 pages and there are two free 
+ * chunks as follows:
+ *
+ *            AAFF AAAF AA  (A: allocated, F: free)
+ *
+ * bitmap #0: 1100 1110 111 (last bit: sentinel)
+ * bitmap #1: 1 0  1 1  1 1
+ * bitmap #2: 1    1    1
+ * bitmap #3: 1         1
+ * bitmap #4: 1
+*/
     int byte_sum = 0;
     bits = max_size / BUDDY_PAGESIZE;  //max_size 有多少页，每一页用一位来表示
     for (i = 0; i < BUDDY_BINS_CNT; i++)
