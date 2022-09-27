@@ -74,7 +74,7 @@ buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *fi
         bytes = bits / 8 + 1; /* 最后需要 sentinel bit (哨兵位) */
         byte_sum += bytes;
         bits = (bits + 1) / 2;  //上一层的位数*2 >= 下一层的个数
-    } 
+    }
 
     uint64_t reserved = sizeof(pbuddy_alloc_t) + byte_sum * sizeof(char); //allocator结构体后面是byte_sum字节的bitmap
     alloc = (pbuddy_alloc_t *)mmap(NULL, reserved, PROT_READ | PROT_WRITE,
@@ -104,7 +104,6 @@ buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *fi
     }
 
     alloc->page_start = (char *)page_start;
-    alloc->pot_start = NULL;     // 初始化为NULL，当为POT分配时，记录它的地址
     alloc->reserved = reserved;  //allocator结构体和bitmap的字节大小
 
     /* 考虑到未来扩展可使用的 buddy page  */
