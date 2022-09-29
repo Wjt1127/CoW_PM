@@ -45,7 +45,7 @@ pbuddy_alloc_t *pbuddy_alloc_init(char *file_fullpath, void *base_ptr, size_t ma
     }
 
     // 将文件映射到内存。
-    addr = mmap(base_ptr, max_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    addr = mmap(base_ptr, max_size, PROT_READ | PROT_WRITE, MAP_PRIVATE, fd, 0);
     
     if (addr == MAP_FAILED)
     {

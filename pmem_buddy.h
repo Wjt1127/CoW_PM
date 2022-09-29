@@ -3,6 +3,8 @@
 
 #include "buddy_alloc.h"
 
+pbuddy_alloc_t *allocator;    //使用这个当作全局的唯一 PM 分配器
+
 pbuddy_alloc_t *pbuddy_alloc_init(char *dir, void *base_ptr, uint64_t max_size, uint64_t size);
 int pbuddy_alloc_destroy(pbuddy_alloc_t **alloc_ptr);
 void *pbuddy_malloc(pbuddy_alloc_t *allocator, uint64_t size);

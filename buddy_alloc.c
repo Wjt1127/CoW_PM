@@ -104,6 +104,7 @@ buddy_allocator_new(void *page_start, uint64_t max_size, uint64_t size, char *fi
     }
 
     alloc->page_start = (char *)page_start;
+    alloc->pot_offset = 0;         // 初始化为0
     alloc->reserved = reserved;  //allocator结构体和bitmap的字节大小
 
     /* 考虑到未来扩展可使用的 buddy page  */
